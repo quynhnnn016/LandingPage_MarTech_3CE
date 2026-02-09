@@ -8,7 +8,7 @@ export const PRODUCTS: Product[] = [
     category: 'Relief Drink',
     description: 'Thức uống giải rượu công thức độc quyền với hơn 40 triệu chai đã được bán ra tại Hàn Quốc.',
     usp: ['Thảo dược quý hiếm', 'Hiệu quả tức thì', 'Công thức độc quyền'],
-    image: '/images/product_antihangover.jpg',
+    image: '/images/product_hangover.png',
     isHero: true
   },
   {
@@ -17,7 +17,7 @@ export const PRODUCTS: Product[] = [
     category: 'Fruit Sparkling',
     description: 'Vị cam đặc trưng từ đảo Jeju, mang lại trải nghiệm bùng nổ hương vị trái cây.',
     usp: ['Cam Jeju nguyên chất', 'Gas cực mạnh', 'Sảng khoái tức thì'],
-    image: '/images/product_jeju.jpg'
+    image: '/images/product_jeju.png'
   },
   {
     id: 'red-ginseng',
@@ -25,7 +25,7 @@ export const PRODUCTS: Product[] = [
     category: 'Healthy Tea',
     description: 'Sự kết hợp hoàn hảo giữa Nhân sâm đỏ cao cấp, mật ong tinh khiết và lê Hàn Quốc.',
     usp: ['Tăng cường đề kháng', 'Mật ong tự nhiên', 'Năng lượng bền bỉ'],
-    image: '/images/product_honey.jpg'
+    image: '/images/product_honey.png'
   },
   {
     id: 'watermelon',
@@ -33,7 +33,7 @@ export const PRODUCTS: Product[] = [
     category: 'Trendy Twist',
     description: 'Biến tấu hiện đại từ thức uống dưa hấu nổi tiếng, mang vibe kỳ nghỉ vào từng ngụm.',
     usp: ['Hương dưa hấu thanh mát', 'Vibe Summer', 'Ít calo'],
-    image: 'https://images.unsplash.com/photo-1528498033373-3c6c08e93d79?q=80&w=400&h=600&auto=format&fit=crop'
+    image: '/images/product_taengmo.png'
   }
 ];
 
