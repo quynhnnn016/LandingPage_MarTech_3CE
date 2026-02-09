@@ -126,22 +126,25 @@ const App: React.FC = () => {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            // Khi nhìn thấy section này 20% trở lên, thêm class đỏ
             entry.target.classList.add('is-active-tet');
           } else {
-            // Khi cuộn đi chỗ khác, trả lại màu cũ
             entry.target.classList.remove('is-active-tet');
           }
         });
       },
-      { threshold: 0.2 } // Kích hoạt khi thấy 20% diện tích section
+      { threshold: 0.2 } // Thấy 20% diện tích là đổi màu
     );
 
-    const target = document.getElementById('authority');
-    if (target) observer.observe(target);
+    // Tìm và theo dõi cả 2 section: Giá trị và Form VIP
+    const targets = ['authority', 'promo'];
+    targets.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
 
     return () => observer.disconnect();
   }, []);
+  
   return (
     <div className={`antialiased text-black bg-white overflow-x-hidden ${isEditing ? 'editing-mode' : ''}`}>
       <Navbar />
@@ -156,6 +159,22 @@ const App: React.FC = () => {
       <section id="hero" className="relative min-h-screen flex items-center pt-28 pb-16 overflow-hidden bg-white">
         <div className="absolute top-0 right-0 w-1/4 h-full bg-gray-50/50 -z-10"></div>
         <div className="absolute top-40 right-[10%] w-[500px] h-[500px] bg-cjgb-yellow/10 rounded-full blur-[120px] -z-10"></div>
+
+      {/* Hiệu ứng Hoa đào rơi - Đã tối ưu phân bổ */}
+      <div className="absolute inset-0 pointer-events-none z-50 overflow-hidden">
+        {[...Array(20)].map((_, i) => (
+          <div 
+            key={i} 
+            className={`falling-petal petal-${i % 4}`}
+            style={{ 
+              left: `${(i * 7) % 100}%`, // Phân bổ đều từ 0-100% không trùng lặp
+              animationDelay: `${i * 0.5}s`, // Mỗi cánh rơi lệch nhau 0.5s
+              animationDuration: `${6 + (i % 4)}s`, // Tốc độ rơi khác nhau một chút
+              filter: `blur(${i % 2 === 0 ? '0px' : '1px'})` // Cánh mờ cánh rõ tạo độ sâu
+            }}
+          ></div>
+        ))}
+      </div>
         
         <div className="container mx-auto px-6 relative z-10 grid lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-7 order-2 lg:order-1">
@@ -242,7 +261,7 @@ const App: React.FC = () => {
       </section>
 
       {/* NEW SECTION: Brand Authority & Certifications */}
-      <section id="authority" className="py-24 bg-zinc-50 border-y-8 border-black">
+      <section id="authority" className="py-24 bg-zinc-50 border-y-8 border-black transition-all duration-700">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 block mb-4">Quality & Safety Guarantee</span>
@@ -379,7 +398,7 @@ const App: React.FC = () => {
       </section>
 
       {/* VIP Activation Hub / Form Section */}
-      <section id="promo" className="py-24 bg-cjgb-yellow relative overflow-hidden">
+      <section id="promo" className="py-24 bg-cjgb-yellow relative overflow-hidden transition-all duration-700">
         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
            <div className="absolute top-[-10%] right-[-10%] text-[20vw] font-black italic rotate-12">CJGB</div>
            <div className="absolute bottom-[-10%] left-[-10%] text-[20vw] font-black italic -rotate-12">SEOUL</div>
@@ -389,7 +408,7 @@ const App: React.FC = () => {
           <div className="max-w-6xl mx-auto bg-white border-[12px] border-black shadow-[40px_40px_0px_0px_rgba(0,0,0,1)] grid lg:grid-cols-2">
             
             {/* Left Content Column */}
-            <div className="p-10 md:p-16 flex flex-col justify-center border-b-[12px] lg:border-b-0 lg:border-r-[12px] border-black bg-white">
+            <div className="p-10 md:p-16 flex flex-col justify-center border-b-[12px] lg:border-b-0 lg:border-r-[12px] border-black bg-white transition-all duration-700">
               <span className="inline-block bg-black text-cjgb-yellow px-4 py-1 text-[10px] font-black uppercase tracking-[0.3em] mb-6 self-start">
                 Limited Trial Offer
               </span>
@@ -415,7 +434,7 @@ const App: React.FC = () => {
             </div>
 
             {/* Right Form Column */}
-            <div className="p-10 md:p-16 bg-gray-50 flex flex-col justify-center">
+            <div className="p-10 md:p-16 bg-gray-50 flex flex-col justify-center transition-all duration-700">
               <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
@@ -469,43 +488,50 @@ const App: React.FC = () => {
       <Footer />
 
       <style>{`
+        /* Các style cơ bản giữ nguyên */
         .stroke-black { -webkit-text-stroke: 1.5px black; }
         .editing-mode { background-image: radial-gradient(#FFD200 1.5px, transparent 1.5px); background-size: 30px 30px; }
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-          animation: marquee 20s linear infinite;
-          width: fit-content;
-        }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .animate-marquee { animation: marquee 20s linear infinite; width: fit-content; }
+        section { scroll-margin-top: 100px; }
+        html { scroll-behavior: smooth; }
 
-        section {
-          /* Khi bấm vào link, section sẽ dừng lại cách mép trên 100px (để lộ Navbar) */
-          scroll-margin-top: 100px;
-        }
-        
-        html {
-          scroll-behavior: smooth;
-        }
-        
+        /* 1. HIỆU ỨNG NỀN ĐỎ TẾT TỔNG THỂ */
         .is-active-tet {
-          background-color: #D42129 !important; /* Đỏ Tết */
-          transition: background-color 0.7s ease;
+          background-color: #B2181E !important; /* Đỏ đô sang trọng */
+          background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png"); /* Vân giấy sần */
+          transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Thêm dòng này để chữ tiêu đề và mô tả trắng ra cho dễ đọc trên nền đỏ */
+        /* 2. ÉP CHỮ TRẮNG KHI NỀN ĐỎ (Dành cho cả Authority và Promo) */
         .is-active-tet h2, 
-        .is-active-tet p:not(.bg-white p) {
+        .is-active-tet p, 
+        .is-active-tet h3,
+        .is-active-tet h4,
+        .is-active-tet label {
           color: white !important;
+          transition: color 0.5s ease;
         }
-      
-        /* Làm cho các ô chứng nhận trông xịn hơn khi nền đỏ */
-        .is-active-tet .bg-white {
-          background-color: rgba(255, 255, 255, 0.9) !important;
-          border-color: #ffd200 !important; /* Viền vàng cho sang */
+
+        /* 3. XỬ LÝ CÁC Ô TRẮNG (CARDS/FORM) KHI NỀN ĐỎ */
+        /* Biến các ô trắng trong Form và Authority thành đỏ viền vàng */
+        .is-active-tet .bg-white, 
+        .is-active-tet .bg-gray-50,
+        .is-active-tet .bg-zinc-50 {
+          background-color: #B2181E !important;
+          border-color: #FFD200 !important;
+          box-shadow: 15px 15px 0px 0px rgba(0,0,0,0.3) !important;
         }
-  
+
+        /* 4. GIỮ CHO Ô INPUT VÀ SELECT LUÔN DỄ ĐỌC */
+        .is-active-tet input, 
+        .is-active-tet select {
+          background-color: white !important;
+          color: black !important;
+          border-color: #FFD200 !important;
+        }
+
+        /* 5. CHI TIẾT VÀNG KIM (GOLD) */
         .text-tet-gold {
           color: #FFD200;
           text-shadow: 0px 0px 10px rgba(255, 210, 0, 0.5);
@@ -513,21 +539,20 @@ const App: React.FC = () => {
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
         }
-      
-        .border-tet {
-          border: 6px double #FFD200 !important; /* Viền kép vàng kim */
+
+        .is-active-tet .text-cjgb-yellow {
+          color: #FFD200 !important;
         }
-      
-        /* Hiệu ứng nháy chậm cho nút Ưu Đãi (Bạn chỉ cần đổi tên class ở Navbar là xong) */
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-5px); }
+
+        .is-active-tet .border-tet {
+          border: 6px double #FFD200 !important;
         }
-        .animate-bounce-slow {
-          animation: bounce-slow 2s infinite ease-in-out;
-        }
-      
-        /* Tạo bụi vàng rơi ở Hero */
+
+        /* Hiệu ứng nháy chậm cho nút Ưu Đãi */
+        @keyframes bounce-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        .animate-bounce-slow { animation: bounce-slow 2s infinite ease-in-out; }
+
+        /* Bụi vàng rơi ở Hero */
         #hero::before {
           content: "✦";
           position: absolute;
@@ -538,13 +563,42 @@ const App: React.FC = () => {
           font-size: 24px;
           z-index: 20;
         }
-      
-        /* Tùy chỉnh màu đỏ Tết khi active để nó rực hơn */
-        .is-active-tet {
-          background-color: #B2181E !important; /* Đỏ đô truyền thống */
-          background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png"); /* Thêm vân giấy cho sang */
+
+        /* Hiệu ứng cánh hoa đào */
+        .falling-petal {
+          position: absolute;
+          top: -10%;
+          background: linear-gradient(to bottom right, #ffb7c5, #ff8da1); /* Đổ màu hồng đậm nhạt */
+          border-radius: 150% 0 150% 150%; /* Tạo hình giọt nước/cánh hoa */
+          opacity: 0.8;
+          z-index: 60;
+          animation: petal-fall linear infinite;
         }
-      
+
+        /* Tinh chỉnh vị trí và thời gian rơi khác nhau để không bị trùng lặp */
+        .petal-0 { width: 16px; height: 18px; left: 5%; animation-duration: 8s; }
+        .petal-1 { width: 12px; height: 14px; left: 25%; animation-duration: 11s; animation-delay: 1s; }
+        .petal-2 { width: 15px; height: 16px; left: 55%; animation-duration: 9s; animation-delay: 3s; }
+        .petal-3 { width: 10px; height: 12px; left: 80%; animation-duration: 13s; animation-delay: 2s; }
+
+        @keyframes petal-fall {
+          0% {
+            transform: translateY(0) rotate(0deg) translateX(0);
+            opacity: 0;
+          }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% {
+            /* Chỗ này làm hoa rơi chéo và xoay vòng */
+            transform: translateY(110vh) rotate(720deg) translateX(150px);
+            opacity: 0;
+          }
+        }
+
+        .is-active-tet .grayscale {
+            filter: grayscale(0) brightness(1.5); /* Làm icon rực rỡ và sáng hơn trên nền đỏ */
+          }
+        
       `}</style>
     </div>
   );
