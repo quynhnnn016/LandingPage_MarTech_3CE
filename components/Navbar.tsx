@@ -31,8 +31,8 @@ const Navbar: React.FC = () => {
           <a href="#products" className="hover:text-cjgb-yellow transition-colors">Sản Phẩm</a>
           <a href="#authority" className="hover:text-cjgb-yellow transition-colors">Giá Trị</a>
           {/* Mục Ưu Đãi đặc biệt */}
-          <a href="#promo" className={`animate-pulse transition-colors ${isScrolled ? 'text-red-600' : 'text-yellow-300'}`}>
-            Ưu Đãi
+          <a href="#promo" className={`animate-pulse transition-colors font-black ${isScrolled ? 'text-red-600' : 'text-cjgb-yellow'}`}>
+            🧧 Ưu Đãi Tết
           </a>
         </div>
 
