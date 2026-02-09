@@ -456,6 +456,12 @@ const App: React.FC = () => {
           animation: marquee 20s linear infinite;
           width: fit-content;
         }
+
+        section {
+          /* Khi bấm vào link, section sẽ dừng lại cách mép trên 100px (để lộ Navbar) */
+          scroll-margin-top: 100px;
+        }
+
       `}</style>
     </div>
   );
