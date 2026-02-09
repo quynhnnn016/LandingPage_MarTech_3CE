@@ -121,6 +121,27 @@ const App: React.FC = () => {
     setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
   };
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Khi nhìn thấy section này 20% trở lên, thêm class đỏ
+            entry.target.classList.add('is-active-tet');
+          } else {
+            // Khi cuộn đi chỗ khác, trả lại màu cũ
+            entry.target.classList.remove('is-active-tet');
+          }
+        });
+      },
+      { threshold: 0.2 } // Kích hoạt khi thấy 20% diện tích section
+    );
+
+    const target = document.getElementById('authority');
+    if (target) observer.observe(target);
+
+    return () => observer.disconnect();
+  }, []);
   return (
     <div className={`antialiased text-black bg-white overflow-x-hidden ${isEditing ? 'editing-mode' : ''}`}>
       <Navbar />
@@ -461,7 +482,28 @@ const App: React.FC = () => {
           /* Khi bấm vào link, section sẽ dừng lại cách mép trên 100px (để lộ Navbar) */
           scroll-margin-top: 100px;
         }
+        
+        html {
+          scroll-behavior: smooth;
+        }
+        
+        .is-active-tet {
+          background-color: #D42129 !important; /* Đỏ Tết */
+          transition: background-color 0.7s ease;
+        }
 
+        /* Thêm dòng này để chữ tiêu đề và mô tả trắng ra cho dễ đọc trên nền đỏ */
+        .is-active-tet h2, 
+        .is-active-tet p:not(.bg-white p) {
+          color: white !important;
+        }
+      
+        /* Làm cho các ô chứng nhận trông xịn hơn khi nền đỏ */
+        .is-active-tet .bg-white {
+          background-color: rgba(255, 255, 255, 0.9) !important;
+          border-color: #ffd200 !important; /* Viền vàng cho sang */
+        }
+        
       `}</style>
     </div>
   );
