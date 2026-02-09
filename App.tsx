@@ -121,6 +121,27 @@ const App: React.FC = () => {
     setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
   };
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Khi nhìn thấy section này 20% trở lên, thêm class đỏ
+            entry.target.classList.add('is-active-tet');
+          } else {
+            // Khi cuộn đi chỗ khác, trả lại màu cũ
+            entry.target.classList.remove('is-active-tet');
+          }
+        });
+      },
+      { threshold: 0.2 } // Kích hoạt khi thấy 20% diện tích section
+    );
+
+    const target = document.getElementById('authority');
+    if (target) observer.observe(target);
+
+    return () => observer.disconnect();
+  }, []);
   return (
     <div className={`antialiased text-black bg-white overflow-x-hidden ${isEditing ? 'editing-mode' : ''}`}>
       <Navbar />
@@ -156,17 +177,19 @@ const App: React.FC = () => {
                 tagName="h1"
                 className="text-6xl md:text-8xl font-black tracking-tighter"
               />
+              
               <div className="relative mt-2">
-                <span className="relative z-10 bg-cjgb-yellow px-6 py-1 inline-block">
+                <span className="relative z-10 bg-black px-6 py-1 inline-block"> {/* Đổi bg thành black để làm nổi chữ vàng */}
                   <EditableText 
                     value={heroContent.titleYellow} 
                     onChange={(v) => setHeroContent({...heroContent, titleYellow: v})} 
                     isEditing={isEditing} 
-                    className="text-6xl md:text-8xl font-black tracking-tighter text-black"
+                    className="text-6xl md:text-8xl font-black tracking-tighter text-tet-gold" // Sửa thành text-tet-gold
                   />
                 </span>
-                <div className="absolute -bottom-2 -right-2 w-full h-full bg-black -z-10"></div>
+                <div className="absolute -bottom-2 -right-2 w-full h-full bg-cjgb-yellow -z-10"></div>
               </div>
+                            
               <div className="mt-4">
                 <EditableText 
                   value={heroContent.titleItalic} 
@@ -236,9 +259,9 @@ const App: React.FC = () => {
                 { title: 'FDA REGISTERED', code: 'US Quality', desc: 'Đạt tiêu chuẩn xuất khẩu và lưu hành tại thị trường Hoa Kỳ.', icon: '🇺🇸' },
                 { title: 'K-LABS', code: 'Scientific R&D', desc: 'Hơn 300 cuộc thử nghiệm độc lập tại phòng Lab Hàn Quốc.', icon: '🔬' }
               ].map((cert, i) => (
-                <div key={i} className="bg-white border-4 border-black p-6 hover:bg-cjgb-yellow transition-colors group">
+                <div key={i} className="bg-white border-4 border-black p-6 hover:bg-cjgb-yellow transition-colors group border-tet">
                   <div className="text-4xl mb-4 grayscale group-hover:grayscale-0 transition-all">{cert.icon}</div>
-                  <h3 className="text-xl font-black uppercase tracking-tighter mb-1">{cert.title}</h3>
+                  <h3 className="text-xl font-black uppercase tracking-tighter mb-1 group-hover:text-black">{cert.title}</h3>
                   <p className="text-[8px] font-black text-gray-400 group-hover:text-black mb-3 uppercase tracking-widest">{cert.code}</p>
                   <p className="text-xs font-bold text-gray-500 group-hover:text-black/80 leading-relaxed">{cert.desc}</p>
                 </div>
@@ -456,6 +479,72 @@ const App: React.FC = () => {
           animation: marquee 20s linear infinite;
           width: fit-content;
         }
+
+        section {
+          /* Khi bấm vào link, section sẽ dừng lại cách mép trên 100px (để lộ Navbar) */
+          scroll-margin-top: 100px;
+        }
+        
+        html {
+          scroll-behavior: smooth;
+        }
+        
+        .is-active-tet {
+          background-color: #D42129 !important; /* Đỏ Tết */
+          transition: background-color 0.7s ease;
+        }
+
+        /* Thêm dòng này để chữ tiêu đề và mô tả trắng ra cho dễ đọc trên nền đỏ */
+        .is-active-tet h2, 
+        .is-active-tet p:not(.bg-white p) {
+          color: white !important;
+        }
+      
+        /* Làm cho các ô chứng nhận trông xịn hơn khi nền đỏ */
+        .is-active-tet .bg-white {
+          background-color: rgba(255, 255, 255, 0.9) !important;
+          border-color: #ffd200 !important; /* Viền vàng cho sang */
+        }
+  
+        .text-tet-gold {
+          color: #FFD200;
+          text-shadow: 0px 0px 10px rgba(255, 210, 0, 0.5);
+          background: linear-gradient(to bottom, #FFD200 20%, #F5AF19 50%, #FFD200 80%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+      
+        .border-tet {
+          border: 6px double #FFD200 !important; /* Viền kép vàng kim */
+        }
+      
+        /* Hiệu ứng nháy chậm cho nút Ưu Đãi (Bạn chỉ cần đổi tên class ở Navbar là xong) */
+        @keyframes bounce-slow {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-5px); }
+        }
+        .animate-bounce-slow {
+          animation: bounce-slow 2s infinite ease-in-out;
+        }
+      
+        /* Tạo bụi vàng rơi ở Hero */
+        #hero::before {
+          content: "✦";
+          position: absolute;
+          top: 15%;
+          left: 10%;
+          color: #FFD200;
+          animation: pulse 3s infinite;
+          font-size: 24px;
+          z-index: 20;
+        }
+      
+        /* Tùy chỉnh màu đỏ Tết khi active để nó rực hơn */
+        .is-active-tet {
+          background-color: #B2181E !important; /* Đỏ đô truyền thống */
+          background-image: url("https://www.transparenttextures.com/patterns/paper-fibers.png"); /* Thêm vân giấy cho sang */
+        }
+      
       `}</style>
     </div>
   );
