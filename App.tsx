@@ -115,7 +115,7 @@ const App: React.FC = () => {
       id: 1, 
       title: 'ISO 22000:2018', 
       desc: 'Hệ thống quản lý an toàn thực phẩm', 
-      image: '/images/cert_iso.jpg' 
+      image: '/images/cert_iso.webp' 
     },
     { 
       id: 2, 
@@ -222,7 +222,7 @@ const App: React.FC = () => {
         <div className="container mx-auto px-6 relative z-10 grid lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-7 order-2 lg:order-1">
             <div className="inline-flex items-center space-x-4 mb-10">
-              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-gray-400 bg-gray-50 px-4 py-2 border border-gray-100">
+              <span className="text-[15px] font-black uppercase tracking-[0.5em] text-gray-400 bg-gray-50 px-4 py-2 border border-gray-100">
                 <EditableText 
                   value={heroContent.badge} 
                   onChange={(v) => setHeroContent({...heroContent, badge: v})} 
@@ -241,7 +241,7 @@ const App: React.FC = () => {
               />
               
               <div className="relative mt-2">
-                <span className="relative z-10 bg-black px-6 py-1 inline-block"> {/* Đổi bg thành black để làm nổi chữ vàng */}
+                <span className="relative z-10 bg-black px-6 py-4 inline-block"> {/* Đổi bg thành black để làm nổi chữ vàng */}
                   <EditableText 
                     value={heroContent.titleYellow} 
                     onChange={(v) => setHeroContent({...heroContent, titleYellow: v})} 
@@ -252,7 +252,7 @@ const App: React.FC = () => {
                 <div className="absolute -bottom-2 -right-2 w-full h-full bg-cjgb-yellow -z-10"></div>
               </div>
                             
-              <div className="mt-4">
+              <div className="mt-8">
                 <EditableText 
                   value={heroContent.titleItalic} 
                   onChange={(v) => setHeroContent({...heroContent, titleItalic: v})} 
@@ -315,7 +315,7 @@ const App: React.FC = () => {
             {/* Left Content: Typography Driven */}
             <div className="lg:col-span-7 space-y-10">
               <div>
-                <span className="text-cjgb-yellow font-black uppercase tracking-widest text-xs mb-2 block">The Science Inside</span>
+                <span className="text-cjgb-yellow font-black uppercase tracking-widest text-s mb-2 block">The Science Inside</span>
                 <h2 className="text-4xl md:text-6xl font-black uppercase tracking-normal leading-none">
                   TẠI SAO CJGB LÀ <br />
                   <span className="text-cjgb-yellow leading-normal">LỰA CHỌN TỐI ƯU</span> <br />
@@ -387,7 +387,7 @@ const App: React.FC = () => {
         <section id="certifications" className="py-24 bg-zinc-50 border-y-8 border-black overflow-hidden">
           <div className="container mx-auto px-6">
             <div className="text-center mb-12">
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 block mb-4">Official Documents</span>
+              <span className="text-[15px] font-black uppercase tracking-[0.4em] text-gray-400 block mb-4">Official Documents</span>
               <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter mb-4">
                 CHỨNG NHẬN <span className="text-4xl md:text-5xl text-cjgb-yellow uppercase tracking-tighter mb-4">NĂNG LỰC & CHẤT LƯỢNG</span>
               </h2>
@@ -480,7 +480,7 @@ const App: React.FC = () => {
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
             <div className="max-w-2xl">
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-400 block mb-4">Real Experiences</span>
+              <span className="text-[15px] font-black uppercase tracking-[0.4em] text-gray-400 block mb-4">Real Experiences</span>
               <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.85]">
                 GEN Z <span className="text-cjgb-yellow italic">TIN DÙNG</span> <br />
                 VÀ LAN TỎA
