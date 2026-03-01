@@ -7,18 +7,48 @@ import ImageEditor from './components/ImageEditor';
 import SocialProofPopup from './components/SocialProofPopup';
 import DynamicReviews from './components/DynamicReviews';
 import Footer from './components/Footer';
-import { 
-  PRODUCTS as INITIAL_PRODUCTS, 
-  PARTNERS, 
-  INITIAL_NOTIFICATIONS, 
-  INITIAL_REVIEWS 
+import {
+  PRODUCTS as INITIAL_PRODUCTS,
+  PARTNERS,
+  INITIAL_NOTIFICATIONS,
+  INITIAL_REVIEWS
 } from './constants';
 import { Product, Review, SocialNotification } from './types';
+import { useLeadSubmit } from './hooks/useLeadSubmit';
 
 const App: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [activeInsight, setActiveInsight] = useState<number | null>(null);
-  
+
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    productOfInterest: '',
+    wantsTrialKit: false,
+  });
+
+  const { submitLead, loading, success, error, resetStatus } = useLeadSubmit();
+
+  const handleLeadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.phone || !formData.email) {
+      alert("Vui lòng điền đầy đủ các thông tin bắt buộc: Tên, Số điện thoại và Email.");
+      return;
+    }
+    const isSuccess = await submitLead(formData);
+    if (isSuccess) {
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
+        productOfInterest: '',
+        wantsTrialKit: false,
+      });
+      setTimeout(() => resetStatus(), 5000);
+    }
+  };
+
   const [products, setProducts] = useState<Product[]>(() => {
     const saved = localStorage.getItem('cjgb_products');
     if (saved) {
@@ -110,30 +140,30 @@ const App: React.FC = () => {
   });
 
   // --- CAROUSEL STATE ---
-  const [certificates, setCertificates] = useState<Array<{id:number; title:string; desc:string; image:string}>>([
-    { 
-      id: 1, 
-      title: 'ISO 22000:2018', 
-      desc: 'Hệ thống quản lý an toàn thực phẩm', 
-      image: '/images/cert_iso.webp' 
+  const [certificates, setCertificates] = useState<Array<{ id: number; title: string; desc: string; image: string }>>([
+    {
+      id: 1,
+      title: 'ISO 22000:2018',
+      desc: 'Hệ thống quản lý an toàn thực phẩm',
+      image: '/images/cert_iso.webp'
     },
-    { 
-      id: 2, 
-      title: 'HACCP CODEX', 
-      desc: 'Chứng nhận kiểm soát điểm tới hạn', 
-      image: '/images/cert_haccp.jpg' 
+    {
+      id: 2,
+      title: 'HACCP CODEX',
+      desc: 'Chứng nhận kiểm soát điểm tới hạn',
+      image: '/images/cert_haccp.jpg'
     },
-    { 
-      id: 3, 
-      title: 'FDA REGISTERED', 
-      desc: 'Tiêu chuẩn xuất khẩu Hoa Kỳ', 
-      image: '/images/cert_fda.jpg' 
+    {
+      id: 3,
+      title: 'FDA REGISTERED',
+      desc: 'Tiêu chuẩn xuất khẩu Hoa Kỳ',
+      image: '/images/cert_fda.jpg'
     },
-    { 
-      id: 4, 
-      title: 'BUSAN PARTNER', 
-      desc: 'Đối tác chiến lược TP. Busan', 
-      image: '/images/cert_award.jpg' 
+    {
+      id: 4,
+      title: 'BUSAN PARTNER',
+      desc: 'Đối tác chiến lược TP. Busan',
+      image: '/images/cert_award.jpg'
     },
   ]);
 
@@ -187,14 +217,25 @@ const App: React.FC = () => {
 
     return () => observer.disconnect();
   }, []);
-  
+
   return (
     <div className={`antialiased text-black bg-white overflow-x-hidden ${isEditing ? 'editing-mode' : ''}`}>
+      {/* Toast Notification */}
+      {(success || error) && (
+        <div className={`fixed top-4 right-4 z-[9999] px-6 py-4 border-4 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex items-center space-x-3 transition-all ${success ? 'bg-green-400 border-black text-black' : 'bg-red-500 border-white text-white'
+          }`}>
+          <div className="font-black uppercase tracking-widest text-sm">
+            {success ? 'Gửi thành công! Chúng tôi sẽ liên hệ sớm.' : error}
+          </div>
+          <button onClick={resetStatus} className="text-xl font-bold ml-4 hover:scale-110">&times;</button>
+        </div>
+      )}
+
       <Navbar />
-      
-      <SocialProofPopup 
-        notifications={notifications} 
-        isEditing={isEditing} 
+
+      <SocialProofPopup
+        notifications={notifications}
+        isEditing={isEditing}
         onUpdate={setNotifications}
       />
 
@@ -203,81 +244,81 @@ const App: React.FC = () => {
         <div className="absolute top-0 right-0 w-1/4 h-full bg-gray-50/50 -z-10"></div>
         <div className="absolute top-40 right-[10%] w-[500px] h-[500px] bg-cjgb-yellow/10 rounded-full blur-[120px] -z-10"></div>
 
-      {/* Hiệu ứng Hoa đào rơi - Đã tối ưu phân bổ */}
-      <div className="absolute inset-0 pointer-events-none z-50 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
-          <div 
-            key={i} 
-            className={`falling-petal petal-${i % 4}`}
-            style={{ 
-              left: `${(i * 7) % 100}%`, // Phân bổ đều từ 0-100% không trùng lặp
-              animationDelay: `${i * 0.5}s`, // Mỗi cánh rơi lệch nhau 0.5s
-              animationDuration: `${6 + (i % 4)}s`, // Tốc độ rơi khác nhau một chút
-              filter: `blur(${i % 2 === 0 ? '0px' : '1px'})` // Cánh mờ cánh rõ tạo độ sâu
-            }}
-          ></div>
-        ))}
-      </div>
-        
+        {/* Hiệu ứng Hoa đào rơi - Đã tối ưu phân bổ */}
+        <div className="absolute inset-0 pointer-events-none z-50 overflow-hidden">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className={`falling-petal petal-${i % 4}`}
+              style={{
+                left: `${(i * 7) % 100}%`, // Phân bổ đều từ 0-100% không trùng lặp
+                animationDelay: `${i * 0.5}s`, // Mỗi cánh rơi lệch nhau 0.5s
+                animationDuration: `${6 + (i % 4)}s`, // Tốc độ rơi khác nhau một chút
+                filter: `blur(${i % 2 === 0 ? '0px' : '1px'})` // Cánh mờ cánh rõ tạo độ sâu
+              }}
+            ></div>
+          ))}
+        </div>
+
         <div className="container mx-auto px-6 relative z-10 grid lg:grid-cols-12 gap-12 items-center">
           <div className="lg:col-span-7 order-2 lg:order-1">
             <div className="inline-flex items-center space-x-4 mb-10">
               <span className="text-[15px] font-black uppercase tracking-[0.5em] text-gray-400 bg-gray-50 px-4 py-2 border border-gray-100">
-                <EditableText 
-                  value={heroContent.badge} 
-                  onChange={(v) => setHeroContent({...heroContent, badge: v})} 
-                  isEditing={isEditing} 
+                <EditableText
+                  value={heroContent.badge}
+                  onChange={(v) => setHeroContent({ ...heroContent, badge: v })}
+                  isEditing={isEditing}
                 />
               </span>
             </div>
-            
+
             <div className="mb-10 flex flex-col items-start leading-none">
-              <EditableText 
-                value={heroContent.title1} 
-                onChange={(v) => setHeroContent({...heroContent, title1: v})} 
-                isEditing={isEditing} 
+              <EditableText
+                value={heroContent.title1}
+                onChange={(v) => setHeroContent({ ...heroContent, title1: v })}
+                isEditing={isEditing}
                 tagName="h1"
                 className="text-6xl md:text-8xl font-black tracking-tighter"
               />
-              
+
               <div className="relative mt-2">
                 <span className="relative z-10 bg-black px-6 py-4 inline-block"> {/* Đổi bg thành black để làm nổi chữ vàng */}
-                  <EditableText 
-                    value={heroContent.titleYellow} 
-                    onChange={(v) => setHeroContent({...heroContent, titleYellow: v})} 
-                    isEditing={isEditing} 
+                  <EditableText
+                    value={heroContent.titleYellow}
+                    onChange={(v) => setHeroContent({ ...heroContent, titleYellow: v })}
+                    isEditing={isEditing}
                     className="text-6xl md:text-8xl font-black tracking-tighter text-tet-gold" // Sửa thành text-tet-gold
                   />
                 </span>
                 <div className="absolute -bottom-2 -right-2 w-full h-full bg-cjgb-yellow -z-10"></div>
               </div>
-                            
+
               <div className="mt-8">
-                <EditableText 
-                  value={heroContent.titleItalic} 
-                  onChange={(v) => setHeroContent({...heroContent, titleItalic: v})} 
-                  isEditing={isEditing} 
+                <EditableText
+                  value={heroContent.titleItalic}
+                  onChange={(v) => setHeroContent({ ...heroContent, titleItalic: v })}
+                  isEditing={isEditing}
                   className="text-6xl md:text-8xl font-black tracking-tighter text-black"
                 />
               </div>
             </div>
 
             <div className="mb-14 max-w-lg border-l-4 border-black pl-8">
-              <EditableText 
-                value={heroContent.description} 
-                onChange={(v) => setHeroContent({...heroContent, description: v})} 
-                isEditing={isEditing} 
+              <EditableText
+                value={heroContent.description}
+                onChange={(v) => setHeroContent({ ...heroContent, description: v })}
+                isEditing={isEditing}
                 multiline
                 tagName="p"
                 className="text-lg text-gray-500 font-medium leading-relaxed"
               />
             </div>
-            
+
             <div className="flex flex-col sm:flex-row items-center space-y-6 sm:space-y-0 sm:space-x-12">
               <button className="w-full bg-black text-white p-6 text-xl font-black uppercase tracking-[0.2em] hover:bg-cjgb-yellow hover:text-white transition-all border-4 border-black shadow-[8px_8px_0px_0px_rgba(255,210,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1">
                 KHÁM PHÁ NGAY
               </button>
-              
+
               <div className="flex flex-col items-start space-y-2">
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Ưu đãi kết thúc sau:</p>
                 <CountdownTimer />
@@ -289,10 +330,10 @@ const App: React.FC = () => {
           <div className="lg:col-span-5 order-1 lg:order-2 flex justify-center lg:justify-end">
             <div className="relative w-full max-w-[400px]">
               <div className="aspect-[4/5] rounded-[15px] overflow-hidden border-[10px] border-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] relative z-10">
-                <ImageEditor 
-                  src={heroContent.image} 
-                  alt="CJGB Hero Product" 
-                  onImageChange={(v) => setHeroContent({...heroContent, image: v})}
+                <ImageEditor
+                  src={heroContent.image}
+                  alt="CJGB Hero Product"
+                  onImageChange={(v) => setHeroContent({ ...heroContent, image: v })}
                   isEditing={isEditing}
                   className="w-full h-full object-cover"
                 />
@@ -311,7 +352,7 @@ const App: React.FC = () => {
 
         <div className="container mx-auto px-6 relative z-10">
           <div className="grid lg:grid-cols-12 gap-16 items-center">
-            
+
             {/* Left Content: Typography Driven */}
             <div className="lg:col-span-7 space-y-10">
               <div>
@@ -367,113 +408,113 @@ const App: React.FC = () => {
 
             {/* Right Visual: Image Placeholder or Abstract Graphic */}
             <div className="lg:col-span-5 relative">
-               <div className="relative z-10 bg-cjgb-yellow border-4 border-black p-2 shadow-[20px_20px_0px_0px_#ffffff]">
-                  <img 
-                    src="/images/image_benefit.jpg" 
-                    alt="Healthy Ingredients" 
-                    className="w-full h-auto object-cover grayscale hover:grayscale-0 transition-all duration-500 border-2 border-black"
-                  />
-                  <div className="absolute -bottom-6 -right-6 bg-black text-white px-6 py-4 border-4 border-white">
-                    <p className="text-3xl font-black italic">100%</p>
-                    <p className="text-[10px] font-bold uppercase tracking-widest">Natural Extract</p>
-                  </div>
-               </div>
+              <div className="relative z-10 bg-cjgb-yellow border-4 border-black p-2 shadow-[20px_20px_0px_0px_#ffffff]">
+                <img
+                  src="/images/image_benefit.jpg"
+                  alt="Healthy Ingredients"
+                  className="w-full h-auto object-cover grayscale hover:grayscale-0 transition-all duration-500 border-2 border-black"
+                />
+                <div className="absolute -bottom-6 -right-6 bg-black text-white px-6 py-4 border-4 border-white">
+                  <p className="text-3xl font-black italic">100%</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest">Natural Extract</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-        {/* HỆ THỐNG CHỨNG NHẬN (CAROUSEL & STATIC) */}
-        <section id="certifications" className="py-24 bg-zinc-50 border-y-8 border-black overflow-hidden">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-12">
-              <span className="text-[15px] font-black uppercase tracking-[0.4em] text-gray-400 block mb-4">Official Documents</span>
-              <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter mb-4">
-                CHỨNG NHẬN <span className="text-4xl md:text-5xl text-cjgb-yellow uppercase tracking-tighter mb-4">NĂNG LỰC & CHẤT LƯỢNG</span>
-              </h2>
-              <div className="w-24 h-2 bg-black mx-auto"></div>
-            </div>
+      {/* HỆ THỐNG CHỨNG NHẬN (CAROUSEL & STATIC) */}
+      <section id="certifications" className="py-24 bg-zinc-50 border-y-8 border-black overflow-hidden">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-12">
+            <span className="text-[15px] font-black uppercase tracking-[0.4em] text-gray-400 block mb-4">Official Documents</span>
+            <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter mb-4">
+              CHỨNG NHẬN <span className="text-4xl md:text-5xl text-cjgb-yellow uppercase tracking-tighter mb-4">NĂNG LỰC & CHẤT LƯỢNG</span>
+            </h2>
+            <div className="w-24 h-2 bg-black mx-auto"></div>
+          </div>
 
-            {/* --- PART A: DYNAMIC CAROUSEL (HIỆU ỨNG TRƯỢT AUTO-PLAY) --- */}
-            <div className="relative mb-20 group/slider">
-              <button onClick={prevCert} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black text-cjgb-yellow w-12 h-12 flex items-center justify-center border-2 border-white shadow-xl hover:scale-110 transition-transform cursor-pointer">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
-              </button>
-              <button onClick={nextCert} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black text-cjgb-yellow w-12 h-12 flex items-center justify-center border-2 border-white shadow-xl hover:scale-110 transition-transform cursor-pointer">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
-              </button>
+          {/* --- PART A: DYNAMIC CAROUSEL (HIỆU ỨNG TRƯỢT AUTO-PLAY) --- */}
+          <div className="relative mb-20 group/slider">
+            <button onClick={prevCert} className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-black text-cjgb-yellow w-12 h-12 flex items-center justify-center border-2 border-white shadow-xl hover:scale-110 transition-transform cursor-pointer">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+            </button>
+            <button onClick={nextCert} className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-black text-cjgb-yellow w-12 h-12 flex items-center justify-center border-2 border-white shadow-xl hover:scale-110 transition-transform cursor-pointer">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
+            </button>
 
-              <div className="overflow-hidden px-4 md:px-12 py-4">
-                <div 
-                  className="flex transition-transform duration-500 ease-in-out"
-                  style={{ transform: `translateX(-${currentCertSlide * (100 / itemsPerView)}%)` }}
-                >
-                  {certificates.map((cert) => (
-                    <div key={cert.id} className="min-w-full md:min-w-[33.333%] px-4 flex-shrink-0">
-                      <div className="bg-white border-4 border-black p-4 h-full relative group hover:-translate-y-2 transition-transform duration-300 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)] hover:shadow-[12px_12px_0px_0px_#FFD200]">
-                        <div className="aspect-[3/4] bg-gray-100 border-2 border-gray-200 mb-4 overflow-hidden relative">
-                          {!cert.image.includes('base64') && !cert.image.startsWith('/images') && (
-                             <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-300">
-                                <span className="text-[10px] uppercase font-bold">Upload Document</span>
-                             </div>
-                          )}
-                          <ImageEditor 
-                            src={cert.image} 
-                            alt={cert.title} 
-                            onImageChange={(newImg) => updateCertificateImage(cert.id, newImg)}
-                            isEditing={isEditing}
-                            className="w-full h-full object-contain p-2"
-                          />
-                        </div>
-                        <div className="text-center">
-                          <EditableText 
-                            value={cert.title} 
-                            onChange={(v) => setCertificates(prev => prev.map(c => c.id === cert.id ? {...c, title: v} : c))} 
-                            isEditing={isEditing}
-                            className="text-lg font-black uppercase tracking-tight block mb-1"
-                          />
-                           <EditableText 
-                            value={cert.desc} 
-                            onChange={(v) => setCertificates(prev => prev.map(c => c.id === cert.id ? {...c, desc: v} : c))} 
-                            isEditing={isEditing}
-                            className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block"
-                          />
-                        </div>
-                        <div className="absolute top-2 right-2 w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white border-2 border-white shadow-md">
-                          <span className="text-[8px] font-black">✓</span>
-                        </div>
+            <div className="overflow-hidden px-4 md:px-12 py-4">
+              <div
+                className="flex transition-transform duration-500 ease-in-out"
+                style={{ transform: `translateX(-${currentCertSlide * (100 / itemsPerView)}%)` }}
+              >
+                {certificates.map((cert) => (
+                  <div key={cert.id} className="min-w-full md:min-w-[33.333%] px-4 flex-shrink-0">
+                    <div className="bg-white border-4 border-black p-4 h-full relative group hover:-translate-y-2 transition-transform duration-300 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.1)] hover:shadow-[12px_12px_0px_0px_#FFD200]">
+                      <div className="aspect-[3/4] bg-gray-100 border-2 border-gray-200 mb-4 overflow-hidden relative">
+                        {!cert.image.includes('base64') && !cert.image.startsWith('/images') && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-300">
+                            <span className="text-[10px] uppercase font-bold">Upload Document</span>
+                          </div>
+                        )}
+                        <ImageEditor
+                          src={cert.image}
+                          alt={cert.title}
+                          onImageChange={(newImg) => updateCertificateImage(cert.id, newImg)}
+                          isEditing={isEditing}
+                          className="w-full h-full object-contain p-2"
+                        />
+                      </div>
+                      <div className="text-center">
+                        <EditableText
+                          value={cert.title}
+                          onChange={(v) => setCertificates(prev => prev.map(c => c.id === cert.id ? { ...c, title: v } : c))}
+                          isEditing={isEditing}
+                          className="text-lg font-black uppercase tracking-tight block mb-1"
+                        />
+                        <EditableText
+                          value={cert.desc}
+                          onChange={(v) => setCertificates(prev => prev.map(c => c.id === cert.id ? { ...c, desc: v } : c))}
+                          isEditing={isEditing}
+                          className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block"
+                        />
+                      </div>
+                      <div className="absolute top-2 right-2 w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white border-2 border-white shadow-md">
+                        <span className="text-[8px] font-black">✓</span>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* --- PART B: STATIC CLAIMS (KHẲNG ĐỊNH TĨNH) --- */}
-            <div className="grid md:grid-cols-2 gap-8 border-t-2 border-b-2 border-white py-12">
-              <div className="flex items-start space-x-6 p-6 hover:bg-white transition-colors rounded-lg">
-                 <div className="w-16 h-16 bg-black text-cjgb-yellow flex items-center justify-center text-3xl font-black border-4 border-cjgb-yellow flex-shrink-0 shadow-[4px_4px_0px_0px_#FFD200]">K</div>
-                 <div>
-                   <h3 className="text-xl font-black uppercase mb-2">K-LABS Scientific R&D</h3>
-                   <p className="text-sm font-bold text-gray-500 leading-relaxed">
-                     Sở hữu phòng Lab riêng biệt với hơn 300 cuộc thử nghiệm lâm sàng mỗi năm. Chúng tôi không chỉ sản xuất đồ uống, chúng tôi tạo ra giải pháp khoa học cho sức khỏe.
-                   </p>
-                 </div>
-              </div>
-              <div className="flex items-start space-x-6 p-6 hover:bg-white transition-colors rounded-lg">
-                 <div className="w-16 h-16 bg-white text-black flex items-center justify-center text-3xl font-black border-4 border-black flex-shrink-0 shadow-[4px_4px_0px_0px_#000]">★</div>
-                 <div>
-                   <h3 className="text-xl font-black uppercase mb-2">Giải Thưởng & Đối Tác</h3>
-                   <ul className="text-sm font-bold text-gray-500 space-y-2">
-                     <li className="flex items-center"><span className="w-2 h-2 bg-cjgb-yellow mr-2"></span> Best Partnership Award (GS Retail)</li>
-                     <li className="flex items-center"><span className="w-2 h-2 bg-cjgb-yellow mr-2"></span> Promising Company (Busan City Council)</li>
-                     <li className="flex items-center"><span className="w-2 h-2 bg-cjgb-yellow mr-2"></span> Certificate of Approved Exporter</li>
-                   </ul>
-                 </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
-        </section>
+
+          {/* --- PART B: STATIC CLAIMS (KHẲNG ĐỊNH TĨNH) --- */}
+          <div className="grid md:grid-cols-2 gap-8 border-t-2 border-b-2 border-white py-12">
+            <div className="flex items-start space-x-6 p-6 hover:bg-white transition-colors rounded-lg">
+              <div className="w-16 h-16 bg-black text-cjgb-yellow flex items-center justify-center text-3xl font-black border-4 border-cjgb-yellow flex-shrink-0 shadow-[4px_4px_0px_0px_#FFD200]">K</div>
+              <div>
+                <h3 className="text-xl font-black uppercase mb-2">K-LABS Scientific R&D</h3>
+                <p className="text-sm font-bold text-gray-500 leading-relaxed">
+                  Sở hữu phòng Lab riêng biệt với hơn 300 cuộc thử nghiệm lâm sàng mỗi năm. Chúng tôi không chỉ sản xuất đồ uống, chúng tôi tạo ra giải pháp khoa học cho sức khỏe.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-6 p-6 hover:bg-white transition-colors rounded-lg">
+              <div className="w-16 h-16 bg-white text-black flex items-center justify-center text-3xl font-black border-4 border-black flex-shrink-0 shadow-[4px_4px_0px_0px_#000]">★</div>
+              <div>
+                <h3 className="text-xl font-black uppercase mb-2">Giải Thưởng & Đối Tác</h3>
+                <ul className="text-sm font-bold text-gray-500 space-y-2">
+                  <li className="flex items-center"><span className="w-2 h-2 bg-cjgb-yellow mr-2"></span> Best Partnership Award (GS Retail)</li>
+                  <li className="flex items-center"><span className="w-2 h-2 bg-cjgb-yellow mr-2"></span> Promising Company (Busan City Council)</li>
+                  <li className="flex items-center"><span className="w-2 h-2 bg-cjgb-yellow mr-2"></span> Certificate of Approved Exporter</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Social Proof / Customer Reviews */}
       <section id="reviews" className="py-24 bg-white relative overflow-hidden">
@@ -491,10 +532,10 @@ const App: React.FC = () => {
               <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Average Rating</p>
             </div>
           </div>
-          
-          <DynamicReviews 
-            reviews={reviews} 
-            isEditing={isEditing} 
+
+          <DynamicReviews
+            reviews={reviews}
+            isEditing={isEditing}
             onDelete={(id) => setReviews(prev => prev.filter(r => r.id !== id))}
           />
         </div>
@@ -527,12 +568,12 @@ const App: React.FC = () => {
           {products.map(product => (
             <div key={product.id} className="group relative bg-gray-50 p-6 border-2 border-transparent hover:border-black transition-all flex flex-col h-full min-h-[550px]">
               <div className="aspect-[3/4] overflow-hidden mb-6 bg-gray-200 h-64">
-                <ImageEditor 
-                  src={product.image} 
-                  alt={product.name} 
+                <ImageEditor
+                  src={product.image}
+                  alt={product.name}
                   onImageChange={(v) => updateProduct(product.id, { image: v })}
                   isEditing={isEditing}
-                  className="w-full h-full object-cover transition-transform group-hover:scale-110" 
+                  className="w-full h-full object-cover transition-transform group-hover:scale-110"
                 />
               </div>
               <p className="text-[10px] font-black uppercase tracking-widest text-cjgb-yellow mb-2">
@@ -555,8 +596,8 @@ const App: React.FC = () => {
       {/* VIP Activation Hub / Form Section */}
       <section id="promo" className="py-24 bg-cjgb-yellow relative overflow-hidden transition-all duration-700">
         <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
-           <div className="absolute top-[-10%] right-[-10%] text-[20vw] font-black italic rotate-12">CJGB</div>
-           <div className="absolute bottom-[-10%] left-[-10%] text-[20vw] font-black italic -rotate-12">SEOUL</div>
+          <div className="absolute top-[-10%] right-[-10%] text-[20vw] font-black italic rotate-12">CJGB</div>
+          <div className="absolute bottom-[-10%] left-[-10%] text-[20vw] font-black italic -rotate-12">SEOUL</div>
         </div>
 
         <div className="container mx-auto px-6 relative z-10">
@@ -568,7 +609,7 @@ const App: React.FC = () => {
           </div>
 
           <div className="max-w-6xl mx-auto bg-white border-[12px] border-black shadow-[40px_40px_0px_0px_rgba(0,0,0,1)] grid lg:grid-cols-2">
-            
+
             {/* Left Content Column */}
             <div className="p-10 md:p-16 flex flex-col justify-center border-b-[12px] lg:border-b-0 lg:border-r-[12px] border-black bg-white transition-all duration-700">
               <span className="inline-block bg-black text-cjgb-yellow px-4 py-1 text-[10px] font-black uppercase tracking-[0.3em] mb-6 self-start">
@@ -597,26 +638,26 @@ const App: React.FC = () => {
 
             {/* Right Form Column */}
             <div className="p-10 md:p-16 bg-gray-50 flex flex-col justify-center transition-all duration-700">
-              <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-6" onSubmit={handleLeadSubmit}>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Họ và Tên</label>
-                    <input type="text" placeholder="Tên của bạn..." className="w-full bg-white border-4 border-black p-4 font-bold text-sm focus:bg-cjgb-yellow/10 focus:outline-none transition-colors" />
+                    <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Tên của bạn..." className="w-full bg-white border-4 border-black p-4 font-bold text-sm focus:bg-cjgb-yellow/10 focus:outline-none transition-colors" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Số Điện Thoại</label>
-                    <input type="tel" placeholder="09xx xxx xxx" className="w-full bg-white border-4 border-black p-4 font-bold text-sm focus:bg-cjgb-yellow/10 focus:outline-none transition-colors" />
+                    <input type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="09xx xxx xxx" className="w-full bg-white border-4 border-black p-4 font-bold text-sm focus:bg-cjgb-yellow/10 focus:outline-none transition-colors" />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Email Nhận Ưu Đãi</label>
-                  <input type="email" placeholder="example@email.com" className="w-full bg-white border-4 border-black p-4 font-bold text-sm focus:bg-cjgb-yellow/10 focus:outline-none transition-colors" />
+                  <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="example@email.com" className="w-full bg-white border-4 border-black p-4 font-bold text-sm focus:bg-cjgb-yellow/10 focus:outline-none transition-colors" />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">Dòng sản phẩm quan tâm (Optional)</label>
-                  <select className="w-full bg-white border-4 border-black p-4 font-bold text-sm focus:bg-cjgb-yellow/10 focus:outline-none transition-colors appearance-none">
+                  <select value={formData.productOfInterest} onChange={(e) => setFormData({ ...formData, productOfInterest: e.target.value })} className="w-full bg-white border-4 border-black p-4 font-bold text-sm focus:bg-cjgb-yellow/10 focus:outline-none transition-colors appearance-none">
                     <option value="">Chọn sản phẩm...</option>
                     <option value="hangover">Giải rượu Anti-Hangover</option>
                     <option value="sparkling">Nước trái cây Sparkling Jeju</option>
@@ -627,17 +668,17 @@ const App: React.FC = () => {
                 <div className="pt-4">
                   <label className="flex items-center space-x-4 cursor-pointer group">
                     <div className="relative">
-                      <input type="checkbox" className="sr-only peer" />
+                      <input type="checkbox" checked={formData.wantsTrialKit} onChange={(e) => setFormData({ ...formData, wantsTrialKit: e.target.checked })} className="sr-only peer" />
                       <div className="w-8 h-8 bg-white border-4 border-black peer-checked:bg-black transition-colors flex items-center justify-center">
-                        <svg className="w-4 h-4 text-cjgb-yellow scale-0 peer-checked:scale-100 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        <svg className="w-4 h-4 text-cjgb-yellow scale-0 peer-checked:scale-100 transition-transform" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>
                       </div>
                     </div>
                     <span className="text-xs font-black uppercase tracking-tight group-hover:text-black transition-colors">Tôi muốn nhận Trial Kit dùng thử miễn phí!</span>
                   </label>
                 </div>
 
-                <button className="w-full bg-black text-white p-6 text-xl font-black uppercase tracking-[0.2em] hover:bg-cjgb-yellow hover:text-white transition-all border-4 border-black shadow-[8px_8px_0px_0px_rgba(255,210,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1">
-                  KÍCH HOẠT ĐẶC QUYỀN
+                <button type="submit" disabled={loading} className="w-full bg-black text-white p-6 text-xl font-black uppercase tracking-[0.2em] hover:bg-cjgb-yellow hover:text-white transition-all border-4 border-black shadow-[8px_8px_0px_0px_rgba(255,210,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed">
+                  {loading ? 'ĐANG KÍCH HOẠT...' : 'KÍCH HOẠT ĐẶC QUYỀN'}
                 </button>
                 <p className="text-center text-[8px] font-bold text-gray-400 uppercase tracking-widest">Bảo mật thông tin tuyệt đối theo tiêu chuẩn CJGB Global</p>
               </form>
