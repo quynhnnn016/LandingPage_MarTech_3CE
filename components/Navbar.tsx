@@ -83,9 +83,14 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* Nút Mua Ngay */}
-        <button className={`px-6 py-2 text-xs font-black uppercase tracking-widest transition-all border-2 ${isScrolled ? 'bg-black text-white border-black hover:bg-cjgb-yellow hover:text-black' : 'bg-white text-black border-white hover:bg-cjgb-yellow'}`}>
+        <a 
+          href="https://cjgb-sales-page.vercel.app/" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className={`px-6 py-2 text-xs font-black uppercase tracking-widest transition-all border-2 inline-block text-center ${isScrolled ? 'bg-black text-white border-black hover:bg-cjgb-yellow hover:text-black' : 'bg-white text-black border-white hover:bg-cjgb-yellow'}`}
+        >
           Mua Ngay
-        </button>
+        </a>
       </div>
     </nav>
   );

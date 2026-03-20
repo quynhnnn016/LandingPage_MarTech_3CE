@@ -585,9 +585,14 @@ const App: React.FC = () => {
               <div className="mb-6 flex-grow">
                 <EditableText value={product.description} onChange={(v) => updateProduct(product.id, { description: v })} isEditing={isEditing} multiline className="text-sm text-gray-500" />
               </div>
-              <button className="w-full py-4 bg-black text-white text-xs font-black uppercase tracking-widest hover:bg-cjgb-yellow hover:text-black transition-all border-2 border-black">
+              <a 
+                href="https://cjgb-sales-page.vercel.app/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="w-full py-4 bg-black text-white text-xs font-black uppercase tracking-widest hover:bg-cjgb-yellow hover:text-black transition-all border-2 border-black text-center block"
+              >
                 CHỐT ĐƠN NGAY
-              </button>
+              </a>
             </div>
           ))}
         </div>
