@@ -18,7 +18,7 @@ export const useLeadSubmit = () => {
         setSuccess(false);
         setError(null);
 
-        const webhookUrl = (import.meta as any).env?.VITE_N8N_WEBHOOK_URL || 'https://quynhnnn0106.app.n8n.cloud/webhook-test/cjgb-lead-capture';
+        const webhookUrl = (import.meta as any).env?.VITE_N8N_WEBHOOK_URL || 'https://quynhnnn0106.app.n8n.cloud/webhook/cjgb-lead-capture';
 
         const payload = {
             ...data,
